@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 def nurin_scrape(url):
+    # esperando x segundos como aweonao para que no retorne about:blank
     response = requests.get(url)
 
     soup = BeautifulSoup(response.content, "lxml")
@@ -43,7 +44,7 @@ def nurin_scrape_horario(indice, driver, carrera):
     plan = driver.find_element(By.NAME, "plan_estudio")
     # print("owo")
     # plan.click()
-    print("antes del plan")
+    # print("antes del plan")
     select = Select(plan)
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", plan)
     time.sleep(1)
@@ -61,8 +62,9 @@ def nurin_scrape_horario(indice, driver, carrera):
         )
         time.sleep(1)
         semestre.click()
-        time.sleep(1.5)  # no devuelve la url grrrrrr
+        # no devuelve la url grrrrrr
         driver.switch_to.window(driver.window_handles[-1])
+        time.sleep(4)
         url = driver.current_url
         print(url)
         df = nurin_scrape(str(url))
@@ -76,8 +78,9 @@ def nurin_scrape_horario(indice, driver, carrera):
         # Volver a la página inicial para seleccionar otro semestre
         driver.close()
         driver.switch_to.window(driver.window_handles[0])
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn.btn-primary")))
         time.sleep(1)
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".btn.btn-primary")))
+        time.sleep(1.25)
 
 
 def set_carrera(driver, nombre_carrera):
@@ -89,11 +92,14 @@ def set_carrera(driver, nombre_carrera):
     time.sleep(0.5)
     carrera.click()
     carrera_input = driver.find_element(By.CSS_SELECTOR, ".select2-search__field")
-    carrera_input.send_keys(nombre_carrera)
+    time.sleep(0.3)
+    carrera_input.clear()
+    carrera_input.send_keys(str(nombre_carrera) + " ")
     carrera_input.send_keys(Keys.RETURN)
     time.sleep(1)
     print("obteniendo planes de estudio...")
     i = get_planes_estudio(driver)
+    print(str(i - 1) + " planes de estudio")
     return i
 
 

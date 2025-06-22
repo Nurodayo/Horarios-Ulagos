@@ -17,8 +17,8 @@ carreras.pop(0)
 print(carreras)
 print("Mandandole DDoS a la ULA")
 for carrera in carreras:
-    driver.get("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    time.sleep(4)
+    # driver.get("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    time.sleep(0.5)
     print("carrera " + str(carrera))
     i = set_carrera(driver, str(carrera))
     j = 1
@@ -27,6 +27,6 @@ for carrera in carreras:
         nurin_scrape_horario(j, driver, carrera)
         time.sleep(1)
         j += 1
-    time.sleep(1)
+    time.sleep(0.1)
 
 driver.quit()
