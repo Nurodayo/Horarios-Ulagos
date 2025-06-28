@@ -8,9 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-
-# driver = webdriver.Firefox()
+from playwright.sync_api import sync_playwright
 
 
 def nurin_scrape(url):
@@ -83,46 +81,72 @@ def nurin_scrape_horario(indice, driver, carrera):
         time.sleep(1.25)
 
 
-def set_carrera(driver, nombre_carrera):
-
-    carrera = driver.find_element(
-        By.CSS_SELECTOR, ".select2-selection.select2-selection--single"
-    )
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", carrera)
-    time.sleep(0.5)
+def set_carrera(page, nombre_carrera):
+    carrera = page.locator(".select2-selection.select2-selection--single")
+    carrera.wait_for(state="visible")
     carrera.click()
-    carrera_input = driver.find_element(By.CSS_SELECTOR, ".select2-search__field")
-    time.sleep(0.3)
-    carrera_input.clear()
-    carrera_input.send_keys(str(nombre_carrera) + " ")
-    carrera_input.send_keys(Keys.RETURN)
-    time.sleep(1)
-    print("obteniendo planes de estudio...")
-    i = get_planes_estudio(driver)
-    print(str(i - 1) + " planes de estudio")
-    return i
+    campo_carrera = page.locator(".select2-search__field")
+    campo_carrera.wait_for(state="visible")
+    campo_carrera.type(str(nombre_carrera))
+    campo_carrera.press("Enter")
+    print(f"Obteniendo los planes de estudio ed {nombre_carrera}...")
+    i = get_planes_estudio(page)
+    if i == 0:
+        print(f"\nalgo salio mal")
+    else:
+        print(f"\n{i} planes de estudio")
+        return i
+    # Selenium#
+    # carrera = driver.find_element(
+    #     By.CSS_SELECTOR, ".select2-selection.select2-selection--single"
+    # )
+    # driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", carrera)
+    # time.sleep(0.5)
+    # carrera.click()
+    # carrera_input = driver.find_element(By.CSS_SELECTOR, ".select2-search__field")
+    # time.sleep(0.3)
+    # carrera_input.clear()
+    # carrera_input.send_keys(str(nombre_carrera) + " ")
+    # carrera_input.send_keys(Keys.RETURN)
+    # time.sleep(1)
+    # print("obteniendo planes de estudio...")
+    # i = get_planes_estudio(driver)
+    # print(str(i - 1) + " planes de estudio")
+    # return i
 
 
-def get_planes_estudio(driver):
-    plan = driver.find_element(By.NAME, "plan_estudio")
-    select = Select(plan)
-    print("trabajando...")
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", plan)
-    print("retornando planes")
-    return len(select.options)
+def get_planes_estudio(page):
+    plan = page.locator('[name="plan_estudio"]')
+    plan.wait_for(state="visible")
+    planes = plan.count()
+    return planes
+    # slenderman#
+    # benja weno pal nyacson te tiro to'o el pixi
+    # plan = driver.find_element(By.NAME, "plan_estudio")
+    # select = Select(plan)
+    # print("trabajando...")
+    # driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", plan)
+    # print("retornando planes")
+    # return len(select.options)
 
 
-def get_carreras(driver):
-    carrera = driver.find_element(By.NAME, "carrera")
-    select = Select(carrera)
-    carreras = [option.get_attribute("value") for option in select.options]
+def get_carreras(page):
+    select = page.locator('[name="carrera"]')
+    carreras = select.locator("option")
+    # |||selenium|||
+    # carrera = driver.find_element(By.NAME, "carrera")
+    # select = Select(carrera)
+    # carreras = [option.get_attribute("value") for option in select.options]
     return carreras
 
 
-# driver.get("https://horarios.ulagos.cl/ptomontt/carreras.php")
-# i = set_carrera(driver, "informatica")
-# print(str(i) + "planes de estudio")
-# j = 1
-# while j < i:
-#    nurin_scrape_horario(j, driver, "informatica")
-#    j += 1
+with sync_playwright() as p:
+    browser = p.firefox.launch(
+        headless=False
+    )  # para no tener interfaz grafica :emoticon dinero:
+    page = browser.new_page()
+    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    i = get_carreras(page)
+    print(i.all_text_contents())
+    set_carrera(page, i.all_text_contents()[1])
+    page.close()
