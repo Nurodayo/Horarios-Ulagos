@@ -8,14 +8,27 @@ import time
 
 
 def nurin_scrape(url):
-    # esperando x segundos como aweonao para que no retorne about:blank
     response = requests.get(url)
 
     soup = BeautifulSoup(response.content, "lxml")
 
-    tables = pd.read_html(str(soup))
+    header = soup.find(id="d_h")
+    body = soup.find("tbody")
 
-    df = tables[0]
+    columns = [
+        tag.get_text(strip=True)
+        for tag in header.find_all(lambda t: t.name.startswith("t"))
+    ]
+    rows = []
+    for tr in body.find_all("tr"):
+        row = [
+            tag.get_text(strip=True)
+            for tag in tr.find_all(lambda t: t.name.startswith("t"))
+        ]
+        if row:
+            rows.append(row)
+
+    df = pd.DataFrame(rows, columns=columns)
     return df
 
 
@@ -87,8 +100,7 @@ def save_json(dfl, carrera, indice):
     carrera_nombre_a = carrera.strip()
     carrera_nombre_a = carrera_nombre_a.replace(" ", "-")
     carrera_nombre_a = carrera_nombre_a.replace("/", "-")
-    df = pd.concat(dfl, ignore_index=True)
-    df.to_json(
+    dfl.to_json(
         str(carrera_nombre_a) + str(indice) + ".json", orient="records", indent=2
     )
     # return df
@@ -106,3 +118,8 @@ def save_json(dfl, carrera, indice):
 #  dfl = nurin_scrape_horario(indice, page, i)
 #  save_json(dfl, str(i), 1)
 #  page.close()
+
+json = nurin_scrape(
+    "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
+)
+save_json(json, "icinf", "1")
