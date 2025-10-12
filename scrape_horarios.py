@@ -5,6 +5,7 @@ import pandas as pd
 from playwright.sync_api import sync_playwright
 import re
 import time
+import json
 
 
 def nurin_scrape(url):
@@ -32,67 +33,37 @@ def nurin_scrape(url):
     return df
 
 
-def nurin_scrape_horario(indice, page, carrera):
-    carrera_nombre_a = carrera.replace(" ", "-")
-    carrera_nombre_a = carrera_nombre_a.strip()
-    carrera_nombre_a = re.sub(r"[^\w\-]", "", carrera_nombre_a)
-    # context = browser.new_context()
-    plan = page.locator('[name="plan_estudio"]')
-    plan.select_option(index=indice)
-    semestres = page.locator(".btn.btn-primary")
-    semestres.wait_for(state="visible")
-
-    cant = semestres.count()
-    df_list = []
-    print(f"\n{cant} semestres en {carrera}")
-    i = 0
-    while i < cant:
-        with page.context.expect_page() as new_tab:
-            semestres.nth(i).click()
-            page.wait_for_timeout(500)
-            pagina_horario = new_tab.value
-            page.wait_for_timeout(500)
-            pagina_horario.wait_for_load_state()
-        url = str(pagina_horario.url)
-        df = nurin_scrape(url)
-        df_list.append(df)
-        # df.to_json(carrera_nombre_a + ".json", orient="records", indent=2)
-        page.wait_for_timeout(500)
-        pagina_horario.close()
-        semestres.nth(i).wait_for(state="visible")
-        i += 1
-    return df_list
-
-
-def set_carrera(page, nombre_carrera):
-    carrera = page.locator(".select2-selection.select2-selection--single")
-    carrera.wait_for(state="visible")
-    carrera.click()
-    time.sleep(2)  # a veces clickea y los semestres no cargan
-    campo_carrera = page.locator(".select2-search__field")
-    campo_carrera.wait_for(state="visible")
-    campo_carrera.type(str(nombre_carrera))
-    campo_carrera.press("Enter")
-    print(f"\nObteniendo los planes de estudio ed {nombre_carrera}...")
-    i = get_planes_estudio(page)
-    if i == 0:
-        print(f"\nalgo salio mal")
-        return 0
-    else:
-        print(f"\n{i} planes de estudio")
-        return i
-
-
-def get_planes_estudio(page):
-    plan = page.locator('[name="plan_estudio"]')
-    plan.wait_for(state="visible")
-    planes = plan.count()
-    return planes
+## La pagina cambio como se renderizan las carreras
 
 
 def get_carreras(page):
-    select = page.locator('[name="carrera"]')
-    carreras = select.locator("option")
+    ## scrapeamos las carreras
+    # page.goto("https://admision.ulagos.cl/carreras/campus-y-sedes/")
+    page.locator("#select2-carrera-container").click()
+    input = page.locator(".select2-search__field")
+    i = 0
+    carreras = []
+    while i < 100:
+        print(i)
+        if i < 10:
+            j = "0" + str(i)
+        else:
+            j = str(i)
+        input.fill(str(j))
+        time.sleep(4)  ## esperar a que carguen las carreras
+        carreras_res = page.locator(".select2-results__option").all()
+        carreras_aux = [li.inner_text().strip() for li in carreras_res]
+        print(carreras_aux)
+        carreras.extend(carreras_aux)
+        i += 1
+        ## Fuerza bruta
+    carreras = list(set(carreras))
+
+    df = pd.DataFrame(carreras, columns=["nombre"])
+
+    df.to_json("carreras.json", orient="records", force_ascii=False, indent=4)
+
+    print(df)
     return carreras
 
 
@@ -106,20 +77,12 @@ def save_json(dfl, carrera, indice):
     # return df
 
 
-# with sync_playwright() as p:
-#  browser = p.firefox.launch(
-#      headless=False
-#  )  # para no tener interfaz grafica :emoticon dinero:
-#  page = browser.new_page()
-#  page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-#  i = get_carreras(page).all_text_contents()[1]
-#  print(i)
-#  indice = set_carrera(page, i)
-#  dfl = nurin_scrape_horario(indice, page, i)
-#  save_json(dfl, str(i), 1)
-#  page.close()
-
 json = nurin_scrape(
     "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
 )
 save_json(json, "icinf", "1")
+with sync_playwright() as p:
+    browser = p.firefox.launch(headless=True)
+    page = browser.new_page()
+    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    get_carreras(page)
