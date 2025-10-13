@@ -58,6 +58,10 @@ def get_carreras(page):
         i += 1
         ## Fuerza bruta
     carreras = list(set(carreras))
+    if "No hay resultados" in carreras:
+        carreras.remove("No hay resultados")
+    else:
+        print("posiblemente cambiaron algo en la pagina qlia")
 
     df = pd.DataFrame(carreras, columns=["nombre"])
 
