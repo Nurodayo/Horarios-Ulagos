@@ -95,6 +95,19 @@ def save_json(dfl, carrera, indice):
     # return df
 
 
+def json_to_list():
+    array = None
+    if os.path.exists("./carreras.json"):
+        with open("carreras.json", "r") as archivo:
+            # array = json.load(archivo)
+            dataFrame = pd.read_json(archivo)
+            array = dataFrame.values.tolist()
+    if array != None and array != []:
+        return array
+    else:
+        raise TypeError("No se encontraron carreras")
+
+
 # json = nurin_scrape(
 #     "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
 # )
@@ -105,8 +118,11 @@ def save_json(dfl, carrera, indice):
 #     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
 #     get_carreras(page)
 
-if os.path.exists("./carreras.json"):
-    with open("carreras.json", "r") as archivo:
-        # array = json.load(archivo)
-        dataFrame = pd.read_json(archivo)
-        print(dataFrame.values.tolist())
+# if os.path.exists("./carreras.json"):
+#     with open("carreras.json", "r") as archivo:
+#         # array = json.load(archivo)
+#         dataFrame = pd.read_json(archivo)
+#         array = dataFrame.values.tolist()
+
+array = json_to_list()
+print(array[0])
