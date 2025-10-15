@@ -43,25 +43,38 @@ def get_carreras(page):
     input = page.locator(".select2-search__field")
     i = 0
     carreras = []
-    while i < 100:
+    while i < 10:
         print(i)
-        if i < 10:
-            j = "0" + str(i)
-        else:
-            j = str(i)
+        j = str(i) + " "
         input.fill(str(j))
-        time.sleep(4)  ## esperar a que carguen las carreras
+        ## aprovechamos que podemos usar un caracter y un espacio para renderizar las carreras
+        time.sleep(5)  ## esperamos a que cargue
         carreras_res = page.locator(".select2-results__option").all()
         carreras_aux = [li.inner_text().strip() for li in carreras_res]
         print(carreras_aux)
         carreras.extend(carreras_aux)
         i += 1
-        ## Fuerza bruta
+    # while i < 100:
+    #     print(i)
+    #     if i < 10:
+    #         j = "0" + str(i)
+    #     else:
+    #         j = str(i)
+    #     input.fill(str(j))
+    #     time.sleep(4)  ## esperar a que carguen las carreras
+    #     carreras_res = page.locator(".select2-results__option").all()
+    #     carreras_aux = [li.inner_text().strip() for li in carreras_res]
+    #     print(carreras_aux)
+    #     carreras.extend(carreras_aux)
+    #     i += 1
+    #     ## Fuerza bruta
+
     carreras = list(set(carreras))
+
     if "No hay resultados" in carreras:
         carreras.remove("No hay resultados")
-    else:
-        print("posiblemente cambiaron algo en la pagina qlia")
+    if "Buscando..." in carreras:
+        carreras.remove("Buscando...")
 
     df = pd.DataFrame(carreras, columns=["nombre"])
 
