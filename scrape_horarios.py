@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright
 import re
 import time
 import json
+import os  # posiblemente sacable
 
 
 def nurin_scrape(url):
@@ -94,12 +95,18 @@ def save_json(dfl, carrera, indice):
     # return df
 
 
-json = nurin_scrape(
-    "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
-)
-save_json(json, "icinf", "1")
-with sync_playwright() as p:
-    browser = p.firefox.launch(headless=True)
-    page = browser.new_page()
-    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    get_carreras(page)
+# json = nurin_scrape(
+#     "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
+# )
+# save_json(json, "icinf", "1")
+# with sync_playwright() as p:
+#     browser = p.firefox.launch(headless=True)
+#     page = browser.new_page()
+#     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+#     get_carreras(page)
+
+if os.path.exists("./carreras.json"):
+    with open("carreras.json", "r") as archivo:
+        # array = json.load(archivo)
+        dataFrame = pd.read_json(archivo)
+        print(dataFrame.values.tolist())
