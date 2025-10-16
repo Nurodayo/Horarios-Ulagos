@@ -85,6 +85,15 @@ def get_carreras(page):
     return carreras
 
 
+def scrape_carrera(page, carrera):
+    input = page.locator(".select2-search__field")
+    input.click()
+    input.fill(str(carrera))
+
+    select_plan_estudios = page.locator("#plan_estudio")
+    print(select_plan_estudios)
+
+
 def save_json(dfl, carrera, indice):
     carrera_nombre_a = carrera.strip()
     carrera_nombre_a = carrera_nombre_a.replace(" ", "-")
@@ -97,13 +106,18 @@ def save_json(dfl, carrera, indice):
 
 def json_to_list():
     array = None
+    array_fix = []
     if os.path.exists("./carreras.json"):
         with open("carreras.json", "r") as archivo:
             # array = json.load(archivo)
             dataFrame = pd.read_json(archivo)
             array = dataFrame.values.tolist()
-    if array != None and array != []:
-        return array
+            for list in array:
+                stringy = list[0]
+                array_fix.append(str(stringy))
+
+    if array_fix != None and array_fix != []:
+        return array_fix
     else:
         raise TypeError("No se encontraron carreras")
 
@@ -112,17 +126,18 @@ def json_to_list():
 #     "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
 # )
 # save_json(json, "icinf", "1")
-# with sync_playwright() as p:
-#     browser = p.firefox.launch(headless=True)
-#     page = browser.new_page()
-#     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-#     get_carreras(page)
+with sync_playwright() as p:
+    browser = p.firefox.launch(headless=False)
+    page = browser.new_page()
+    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
 
-# if os.path.exists("./carreras.json"):
-#     with open("carreras.json", "r") as archivo:
-#         # array = json.load(archivo)
-#         dataFrame = pd.read_json(archivo)
-#         array = dataFrame.values.tolist()
+    # if os.path.exists("./carreras.json"):
+    #     with open("carreras.json", "r") as archivo:
+    #         # array = json.load(archivo)
+    #         dataFrame = pd.read_json(archivo)
+    #         array = dataFrame.values.tolist()
 
-array = json_to_list()
-print(array[0])
+    array = json_to_list()
+    print(array)
+
+    scrape_carrera(page, array[0])
