@@ -86,12 +86,20 @@ def get_carreras(page):
 
 
 def scrape_carrera(page, carrera):
-    input = page.locator(".select2-search__field")
-    input.click()
+    c = page.locator(".select2-selection__rendered")
+    c.click()
+    input = input = page.locator(".select2-search__field")
+    print(carrera)
     input.fill(str(carrera))
+    time.sleep(1)
+    page.keyboard.press("Enter")
+    print("cargando")
+    time.sleep(4)  # esperar a q los planes carguen pq vamos muy rapido
 
     select_plan_estudios = page.locator("#plan_estudio")
-    print(select_plan_estudios)
+    planes = page.locator("option").all()
+    options = [option.inner_text().strip() for option in planes]
+    print(options)
 
 
 def save_json(dfl, carrera, indice):
@@ -130,6 +138,8 @@ with sync_playwright() as p:
     browser = p.firefox.launch(headless=False)
     page = browser.new_page()
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    time.sleep(5)
+    print("waited")
 
     # if os.path.exists("./carreras.json"):
     #     with open("carreras.json", "r") as archivo:
@@ -138,6 +148,6 @@ with sync_playwright() as p:
     #         array = dataFrame.values.tolist()
 
     array = json_to_list()
-    print(array)
+    print(array[0])
 
     scrape_carrera(page, array[0])
