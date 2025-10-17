@@ -86,19 +86,30 @@ def get_carreras(page):
 
 
 def scrape_carrera(page, carrera):
+
+    carrera_aux = carrera
+    carrera = carrera.replace("/", "")  # waaaa あ
+
+    print(carrera)
     c = page.locator(".select2-selection__rendered")
     c.click()
     input = input = page.locator(".select2-search__field")
     print(carrera)
     input.fill(str(carrera))
-    time.sleep(1)
+    print("cargando")
+    time.sleep(3)
     page.keyboard.press("Enter")
     print("cargando")
     time.sleep(4)  # esperar a q los planes carguen pq vamos muy rapido
 
-    select_plan_estudios = page.locator("#plan_estudio")
+    # select_plan_estudios = page.locator("#plan_estudio")
     planes = page.locator("option").all()
     options = [option.inner_text().strip() for option in planes]
+    print(options)
+    if carrera_aux in options:
+        options.remove(carrera_aux)
+    if "Seleccione Opción" in options:
+        options.remove("Seleccione Opción")
     print(options)
 
 
@@ -138,7 +149,7 @@ with sync_playwright() as p:
     browser = p.firefox.launch(headless=False)
     page = browser.new_page()
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    time.sleep(5)
+    time.sleep(2)
     print("waited")
 
     # if os.path.exists("./carreras.json"):
@@ -150,4 +161,4 @@ with sync_playwright() as p:
     array = json_to_list()
     print(array[0])
 
-    scrape_carrera(page, array[0])
+    scrape_carrera(page, array[5])
