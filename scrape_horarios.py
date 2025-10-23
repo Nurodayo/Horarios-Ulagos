@@ -118,7 +118,6 @@ def get_options(page, carrera):
 def scrape_carrera(page, carrera, context):
     options = get_options(page, carrera)
     i = 0
-    j = 0
     for option in options:
         i += 1
         print("Locating")
@@ -135,6 +134,8 @@ def scrape_carrera(page, carrera, context):
         time.sleep(5)
 
         buttons = page.locator(".btn").all()
+
+        j = 0
         for button in buttons:
             # n^2
             j += 1
