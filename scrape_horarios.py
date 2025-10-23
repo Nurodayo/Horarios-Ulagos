@@ -115,10 +115,12 @@ def get_options(page, carrera):
     return options
 
 
-def scrape_carrera(page, carrera):
+def scrape_carrera(page, carrera, context):
     options = get_options(page, carrera)
-
+    i = 0
+    j = 0
     for option in options:
+        i += 1
         print("Locating")
         select = page.locator("#plan_estudio")
         select.click()
@@ -128,16 +130,39 @@ def scrape_carrera(page, carrera):
         ## html
         print(option)
         select.select_option(label=option)
-        while True:
-            print("sleeping")
+
+        # Waiting for buttons to load
+        time.sleep(5)
+
+        buttons = page.locator(".btn").all()
+        for button in buttons:
+            # n^2
+            j += 1
+            with context.expect_page() as new_page_info:
+                button.click()
+            new_page = new_page_info.value
+            time.sleep(
+                2
+            )  # no se que deberia ponerle a los time sleep para que funquen mejor
+            url = new_page.url
+            print(url)
+
+            df = nurin_scrape(url)
+            save_json(df, carrera, i, j)
+            new_page.close()
+            time.sleep(1)
+        # while True:
+        #    print("sleeping")  # es para inspeccionar poque despues se cierra todo
 
 
-def save_json(dfl, carrera, indice):
+def save_json(dfl, carrera, indice, jndice):
     carrera_nombre_a = carrera.strip()
     carrera_nombre_a = carrera_nombre_a.replace(" ", "-")
     carrera_nombre_a = carrera_nombre_a.replace("/", "-")
     dfl.to_json(
-        str(carrera_nombre_a) + str(indice) + ".json", orient="records", indent=2
+        str(carrera_nombre_a) + str(indice) + "-" + str(jndice) + ".json",
+        orient="records",
+        indent=2,
     )
     # return df
 
@@ -166,7 +191,8 @@ def json_to_list():
 # save_json(json, "icinf", "1")
 with sync_playwright() as p:
     browser = p.firefox.launch(headless=False)
-    page = browser.new_page()
+    context = browser.new_context()
+    page = context.new_page()
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
     time.sleep(2)
     print("waited")
@@ -180,4 +206,4 @@ with sync_playwright() as p:
     array = json_to_list()
     print(array[5])
 
-    scrape_carrera(page, array[5])
+    scrape_carrera(page, array[5], context)
