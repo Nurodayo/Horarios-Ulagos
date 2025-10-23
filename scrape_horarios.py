@@ -119,8 +119,17 @@ def scrape_carrera(page, carrera):
     options = get_options(page, carrera)
 
     for option in options:
-        seleccion = page.get_by_text(option)
-        print(seleccion)
+        print("Locating")
+        select = page.locator("#plan_estudio")
+        select.click()
+        time.sleep(1)
+        print("Found")
+        # seleccion = page.get_by_text(option)
+        ## html
+        print(option)
+        select.select_option(label=option)
+        while True:
+            print("sleeping")
 
 
 def save_json(dfl, carrera, indice):
@@ -156,7 +165,7 @@ def json_to_list():
 # )
 # save_json(json, "icinf", "1")
 with sync_playwright() as p:
-    browser = p.firefox.launch(headless=True)
+    browser = p.firefox.launch(headless=False)
     page = browser.new_page()
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
     time.sleep(2)
