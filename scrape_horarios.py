@@ -85,12 +85,12 @@ def get_carreras(page):
     return carreras
 
 
-def scrape_carrera(page, carrera):
+def get_options(page, carrera):
 
     carrera_aux = carrera
     carrera = carrera.replace("/", "")  # waaaa あ
 
-    print(carrera)
+    # print(carrera)
     c = page.locator(".select2-selection__rendered")
     c.click()
     input = input = page.locator(".select2-search__field")
@@ -100,7 +100,7 @@ def scrape_carrera(page, carrera):
     time.sleep(3)
     page.keyboard.press("Enter")
     print("cargando")
-    time.sleep(4)  # esperar a q los planes carguen pq vamos muy rapido
+    time.sleep(5)  # esperar a q los planes carguen pq vamos muy rapido
 
     # select_plan_estudios = page.locator("#plan_estudio")
     planes = page.locator("option").all()
@@ -111,6 +111,16 @@ def scrape_carrera(page, carrera):
     if "Seleccione Opción" in options:
         options.remove("Seleccione Opción")
     print(options)
+
+    return options
+
+
+def scrape_carrera(page, carrera):
+    options = get_options(page, carrera)
+
+    for option in options:
+        seleccion = page.get_by_text(option)
+        print(seleccion)
 
 
 def save_json(dfl, carrera, indice):
@@ -146,7 +156,7 @@ def json_to_list():
 # )
 # save_json(json, "icinf", "1")
 with sync_playwright() as p:
-    browser = p.firefox.launch(headless=False)
+    browser = p.firefox.launch(headless=True)
     page = browser.new_page()
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
     time.sleep(2)
@@ -159,6 +169,6 @@ with sync_playwright() as p:
     #         array = dataFrame.values.tolist()
 
     array = json_to_list()
-    print(array[0])
+    print(array[5])
 
     scrape_carrera(page, array[5])
