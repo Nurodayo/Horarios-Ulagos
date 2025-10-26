@@ -168,7 +168,13 @@ def save_json(dfl, carrera, indice, jndice):
     carrera_nombre_a = carrera_nombre_a.replace(" ", "-")
     carrera_nombre_a = carrera_nombre_a.replace("/", "-")
     dfl.to_json(
-        str(carrera_nombre_a) + str(indice) + "-" + str(jndice) + ".json",
+        r"./json/"
+        + str(carrera_nombre_a)
+        + "-p"
+        + str(indice)
+        + "-"
+        + str(jndice)
+        + ".json",
         orient="records",
         indent=2,
     )

@@ -1,1 +1,3 @@
 *.json
+
+!./scraping_script/carreras.json
