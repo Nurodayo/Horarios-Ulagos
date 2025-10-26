@@ -88,8 +88,10 @@ def get_carreras(page):
 def get_options(page, carrera):
 
     carrera_aux = carrera
+    id = [int(temp) for temp in carrera.split() if temp.isdigit()]
+    id = id[0]
     carrera = carrera.replace("/", "")  # waaaa あ
-
+    print("id: " + str(id))
     # print(carrera)
     c = page.locator(".select2-selection__rendered")
     c.click()
@@ -104,13 +106,16 @@ def get_options(page, carrera):
 
     # select_plan_estudios = page.locator("#plan_estudio")
     planes = page.locator("option").all()
-    options = [option.inner_text().strip() for option in planes]
+    options = [option.inner_text() for option in planes]
     print(options)
-    if carrera in options:
-        options.remove(carrera)
+    if carrera_aux in options:
+        print("removing " + carrera_aux)
+        options.remove(carrera_aux)
     if "Seleccione Opción" in options:
         options.remove("Seleccione Opción")
     print(options)
+    options = [s for s in options if str(id) not in s]
+    print("Sacamos toda la basura de los planes => " + str(options))
 
     return options
 

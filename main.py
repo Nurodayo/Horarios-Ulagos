@@ -33,3 +33,5 @@ with sync_playwright() as p:
             "https://horarios.ulagos.cl/ptomontt/carreras.php"
         )  # hack para ver si funca
         time.sleep(2)
+
+    print(" Listo :D")
