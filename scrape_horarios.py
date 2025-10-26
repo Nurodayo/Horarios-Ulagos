@@ -49,7 +49,7 @@ def get_carreras(page):
         j = str(i) + " "
         input.fill(str(j))
         ## aprovechamos que podemos usar un caracter y un espacio para renderizar las carreras
-        time.sleep(5)  ## esperamos a que cargue
+        time.sleep(6)  ## esperamos a que cargue
         carreras_res = page.locator(".select2-results__option").all()
         carreras_aux = [li.inner_text().strip() for li in carreras_res]
         print(carreras_aux)
@@ -97,10 +97,10 @@ def get_options(page, carrera):
     print(carrera)
     input.fill(str(carrera))
     print("cargando")
-    time.sleep(3)
+    time.sleep(4)
     page.keyboard.press("Enter")
     print("cargando")
-    time.sleep(5)  # esperar a q los planes carguen pq vamos muy rapido
+    time.sleep(6)  # esperar a q los planes carguen pq vamos muy rapido
 
     # select_plan_estudios = page.locator("#plan_estudio")
     planes = page.locator("option").all()
@@ -116,6 +116,7 @@ def get_options(page, carrera):
 
 
 def scrape_carrera(page, carrera, context):
+    time.sleep(3)
     options = get_options(page, carrera)
     i = 0
     for option in options:
@@ -123,7 +124,7 @@ def scrape_carrera(page, carrera, context):
         print("Locating")
         select = page.locator("#plan_estudio")
         select.click()
-        time.sleep(1)
+        time.sleep(2)
         print("Found")
         # seleccion = page.get_by_text(option)
         ## html
@@ -131,7 +132,7 @@ def scrape_carrera(page, carrera, context):
         select.select_option(label=option)
 
         # Waiting for buttons to load
-        time.sleep(5)
+        time.sleep(6)
 
         buttons = page.locator(".btn").all()
 
@@ -143,7 +144,7 @@ def scrape_carrera(page, carrera, context):
                 button.click()
             new_page = new_page_info.value
             time.sleep(
-                2
+                3
             )  # no se que deberia ponerle a los time sleep para que funquen mejor
             url = new_page.url
             print(url)
@@ -151,7 +152,7 @@ def scrape_carrera(page, carrera, context):
             df = nurin_scrape(url)
             save_json(df, carrera, i, j)
             new_page.close()
-            time.sleep(1)
+            time.sleep(2)
         # while True:
         #    print("sleeping")  # es para inspeccionar poque despues se cierra todo
 
@@ -190,21 +191,21 @@ def json_to_list():
 #     "https://horarios.ulagos.cl/Global/carrera.php?carrera=3216&nivel=6&plan=3216II2020&sede=2028"
 # )
 # save_json(json, "icinf", "1")
-with sync_playwright() as p:
-    browser = p.firefox.launch(headless=False)
-    context = browser.new_context()
-    page = context.new_page()
-    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    time.sleep(2)
-    print("waited")
-
-    # if os.path.exists("./carreras.json"):
-    #     with open("carreras.json", "r") as archivo:
-    #         # array = json.load(archivo)
-    #         dataFrame = pd.read_json(archivo)
-    #         array = dataFrame.values.tolist()
-
-    array = json_to_list()
-    print(array[5])
-
-    scrape_carrera(page, array[5], context)
+# with sync_playwright() as p:
+#     browser = p.firefox.launch(headless=False)
+#     context = browser.new_context()
+#     page = context.new_page()
+#     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+#     time.sleep(2)
+#     print("waited")
+#
+#     # if os.path.exists("./carreras.json"):
+#     #     with open("carreras.json", "r") as archivo:
+#     #         # array = json.load(archivo)
+#     #         dataFrame = pd.read_json(archivo)
+#     #         array = dataFrame.values.tolist()
+#
+#     array = json_to_list()
+#     print(array[5])
+#
+#     scrape_carrera(page, array[5], context)
