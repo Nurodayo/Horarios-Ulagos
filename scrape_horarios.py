@@ -106,8 +106,8 @@ def get_options(page, carrera):
     planes = page.locator("option").all()
     options = [option.inner_text().strip() for option in planes]
     print(options)
-    if carrera_aux in options:
-        options.remove(carrera_aux)
+    if carrera in options:
+        options.remove(carrera)
     if "Seleccione Opción" in options:
         options.remove("Seleccione Opción")
     print(options)
@@ -116,7 +116,8 @@ def get_options(page, carrera):
 
 
 def scrape_carrera(page, carrera, context):
-    time.sleep(3)
+    print(carrera)
+    time.sleep(4)
     options = get_options(page, carrera)
     i = 0
     for option in options:
