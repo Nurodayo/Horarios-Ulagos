@@ -8,8 +8,12 @@ array = json_to_list()
 for carrera in array:
     print(carrera)
 print("carreras sede puerto montt ^^^")
-nohead = True
+
+scrape_all = False
+nohead = False
 scrape_carrs_again = False
+plans = True
+
 if nohead:
     print("Running headless = True")
 else:
@@ -23,15 +27,19 @@ with sync_playwright() as p:
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
     time.sleep(2)  ## esperamos 2 segundos a que cargue, por l
 
+    if plans:
+        planes_to_json(page, array)
+
     if scrape_carrs_again:
         print("Getting carreras.json again")
         get_carreras(page)
 
-    for carrera in array:
-        scrape_carrera(page, carrera, context)
-        page.goto(
-            "https://horarios.ulagos.cl/ptomontt/carreras.php"
-        )  # hack para ver si funca
-        time.sleep(2)
+    if scrape_all:
+        for carrera in array:
+            scrape_carrera(page, carrera, context)
+            page.goto(
+                "https://horarios.ulagos.cl/ptomontt/carreras.php"
+            )  # hack para ver si funca
+            time.sleep(2)
 
     print(" Listo :D")

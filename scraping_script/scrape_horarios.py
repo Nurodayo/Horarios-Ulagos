@@ -93,9 +93,19 @@ def get_options(page, carrera):
     carrera = carrera.replace("/", "")  # waaaa あ
     print("id: " + str(id))
     # print(carrera)
-    c = page.locator(".select2-selection__rendered")
+    # c = page.locator(".selection")
+    page.wait_for_selector(
+        ".select2-selection.select2-selection--single", state="visible", timeout=10000
+    )
+    c = page.locator(".select2-selection.select2-selection--single")
+    c.dispatch_event("mousedown")
     c.click()
-    input = input = page.locator(".select2-search__field")
+    print("click 1")
+    # print(c)
+    # c.click()
+    time.sleep(0.5)
+    input = page.locator(".select2-search__field")
+    print(input)
     print(carrera)
     input.fill(str(carrera))
     print("cargando")
@@ -197,6 +207,36 @@ def json_to_list():
         return array_fix
     else:
         raise TypeError("No se encontraron carreras")
+
+
+def planes_to_json(page, carreras):
+
+    # page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    page.locator("#select2-carrera-container").click()
+    i = 0
+    dict = {}
+    for carrera in carreras:
+        # page.locator("#select2-carrera-container").click()
+
+        options = get_options(page, carrera)
+        dict[carrera] = set()
+
+        for option in options:
+
+            dict[carrera].add(option)
+
+        page.reload()
+        time.sleep(4)
+
+    data = {k: list(v) for k, v in dict.items()}
+
+    with open("./plans/carreras_planes.json", "w") as f:
+        json.dump(data, f, indent=2)
+
+    print("Yippie")
+
+    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
+    time.sleep(5)
 
 
 # json = nurin_scrape(
