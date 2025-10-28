@@ -6,7 +6,9 @@ from playwright.sync_api import sync_playwright
 import re
 import time
 import json
-import os  # posiblemente sacable
+import os
+
+# from requests.sessions import _FileName  # posiblemente sacable
 
 
 def nurin_scrape(url):
@@ -85,7 +87,7 @@ def get_carreras(page):
     return carreras
 
 
-def get_options(page, carrera):
+def get_options(page, carrera, save_tjs):
 
     carrera_aux = carrera
     id = [int(temp) for temp in carrera.split() if temp.isdigit()]
@@ -94,10 +96,8 @@ def get_options(page, carrera):
     print("id: " + str(id))
     # print(carrera)
     # c = page.locator(".selection")
-    page.wait_for_selector(
-        ".select2-selection.select2-selection--single", state="visible", timeout=10000
-    )
-    c = page.locator(".select2-selection.select2-selection--single")
+    page.wait_for_selector("#select2-carrera-container", state="visible", timeout=10000)
+    c = page.locator("#select2-carrera-container")
     c.dispatch_event("mousedown")
     c.click()
     print("click 1")
@@ -113,7 +113,6 @@ def get_options(page, carrera):
     page.keyboard.press("Enter")
     print("cargando")
     time.sleep(6)  # esperar a q los planes carguen pq vamos muy rapido
-
     # select_plan_estudios = page.locator("#plan_estudio")
     planes = page.locator("option").all()
     options = [option.inner_text() for option in planes]
@@ -127,13 +126,15 @@ def get_options(page, carrera):
     options = [s for s in options if str(id) not in s]
     print("Sacamos toda la basura de los planes => " + str(options))
 
+    if save_tjs:
+        planes_to_json(carrera, options)
     return options
 
 
-def scrape_carrera(page, carrera, context):
+def scrape_carrera(page, carrera, context, save_plans):
     print(carrera)
     time.sleep(4)
-    options = get_options(page, carrera)
+    options = get_options(page, carrera, save_plans)
     i = 0
     for option in options:
         i += 1
@@ -209,34 +210,27 @@ def json_to_list():
         raise TypeError("No se encontraron carreras")
 
 
-def planes_to_json(page, carreras):
+def planes_to_json(carrera, options):
 
+    carrera_nombre_a = carrera.strip()
+    carrera_nombre_a = carrera_nombre_a.replace(" ", "-")
+    carrera_nombre_a = carrera_nombre_a.replace("/", "-")
+
+    filename = "./plans/" + carrera_nombre_a + "-planes.json"
     # page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    page.locator("#select2-carrera-container").click()
-    i = 0
     dict = {}
-    for carrera in carreras:
-        # page.locator("#select2-carrera-container").click()
+    dict[carrera] = set()
 
-        options = get_options(page, carrera)
-        dict[carrera] = set()
+    for option in options:
 
-        for option in options:
-
-            dict[carrera].add(option)
-
-        page.reload()
-        time.sleep(4)
+        dict[carrera].add(option)
 
     data = {k: list(v) for k, v in dict.items()}
 
-    with open("./plans/carreras_planes.json", "w") as f:
+    with open(filename, "w") as f:
         json.dump(data, f, indent=2)
 
-    print("Yippie")
-
-    page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
-    time.sleep(5)
+    print("Saved json for " + str(carrera))
 
 
 # json = nurin_scrape(

@@ -9,7 +9,7 @@ for carrera in array:
     print(carrera)
 print("carreras sede puerto montt ^^^")
 
-scrape_all = False
+scrape_all = True
 nohead = False
 scrape_carrs_again = False
 plans = True
@@ -27,8 +27,8 @@ with sync_playwright() as p:
     page.goto("https://horarios.ulagos.cl/ptomontt/carreras.php")
     time.sleep(2)  ## esperamos 2 segundos a que cargue, por l
 
-    if plans:
-        planes_to_json(page, array)
+    # if plans:
+    #     planes_to_json(page, array)
 
     if scrape_carrs_again:
         print("Getting carreras.json again")
@@ -36,7 +36,9 @@ with sync_playwright() as p:
 
     if scrape_all:
         for carrera in array:
-            scrape_carrera(page, carrera, context)
+            c = page.locator(".select2-selection__rendered")
+            c.click()
+            scrape_carrera(page, carrera, context, plans)
             page.goto(
                 "https://horarios.ulagos.cl/ptomontt/carreras.php"
             )  # hack para ver si funca
